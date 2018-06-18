@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Google Map</string>
+    <string name="title_activity_maps">Google Map</string>
+    <string name="text_ok">OK</string>
+    <string name="text_cancel">Cancel</string>
+    <string name="text_title_close_app_dialog">Thông báo</string>
+    <string name="text_are_you_sure_to_close_app">Bạn có chắc muốn thoát ứng dụng ?</string>
+    <string name="text_des_go">Chọn điểm đi.....</string>
+    <string name="text_des_desti">Chọn điểm đến....</string>
+</resources>

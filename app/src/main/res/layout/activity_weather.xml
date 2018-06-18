@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:background="@drawable/background_weather"
+    >
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/frameLayout">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:background="@color/thoitiet"
+            >
+            <TextView
+                android:text="Thời tiết"
+                android:textSize="23dp"
+                android:textColor="@color/colorWhite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </android.support.v7.widget.Toolbar>
+    </FrameLayout>
+    <TextView
+        android:id="@+id/city"
+        android:textColor="@color/colorWhite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textSize="15dp"
+        android:layout_marginTop="6dp"
+        android:layout_below="@+id/tp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:id="@+id/day"
+        android:textColor="@color/yellow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:textSize="22dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/city"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:id="@+id/temp_weather"
+        android:textColor="@color/colorWhite"
+        android:textSize="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:layout_marginTop="124dp"
+        android:layout_below="@+id/day"
+        android:layout_alignLeft="@+id/grid"
+        android:layout_alignStart="@+id/grid" />
+
+    <GridView
+        android:id="@+id/grid"
+        android:numColumns="7"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/temp_weather"
+        android:layout_marginTop="70dp" />
+
+    <TextView
+        android:id="@+id/min_max"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="22dp"
+        android:textColor="@color/colorWhite"
+        android:layout_marginLeft="6dp"
+        android:text="TextView"
+        android:layout_above="@+id/grid"
+        android:layout_toRightOf="@+id/temp_weather"
+        android:layout_toEndOf="@+id/temp_weather" />
+
+
+
+    <TextView
+        android:id="@+id/tp"
+        android:textColor="@color/colorWhite"
+        android:textSize="28dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@mipmap/gps"
+        android:gravity="center"
+        android:layout_below="@+id/frameLayout"
+        android:layout_alignRight="@+id/grid"
+        android:layout_alignEnd="@+id/grid"
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:id="@+id/sweather"
+        android:layout_width="wrap_content"
+        android:textSize="20dp"
+        android:textColor="@color/colorWhite"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:layout_marginTop="12dp"
+        android:layout_below="@+id/temp_weather"
+        android:layout_alignLeft="@+id/temp_weather"
+        android:layout_alignStart="@+id/temp_weather" />
+
+</RelativeLayout>

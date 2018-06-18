@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/linearLayout"
+        android:padding="5dp"
+        >
+
+        <TextView
+            android:id="@+id/dayweather"
+            android:layout_width="30dp"
+            android:textSize="14dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/day_monthweather"
+            android:layout_width="30dp"
+            android:textSize="14dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/colorWhite" />
+
+        <ImageView
+            android:id="@+id/imageweather"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/temp_max_weather"
+            android:layout_width="30dp"
+            android:textSize="14dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/colorWhite" />
+
+        <TextView
+            android:id="@+id/temp_min_weather"
+            android:layout_width="30dp"
+            android:textSize="14dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/colorWhite" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="1dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/a"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/linearLayout"
+        android:layout_toRightOf="@+id/linearLayout"
+        android:layout_alignBottom="@+id/linearLayout" />
+</RelativeLayout>

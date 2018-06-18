@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- edt -->
+    <dimen name="search_place_edt">50dp</dimen>
+    <dimen name="edt_marginleft">10dp</dimen>
+    <dimen name="edt_marginright">10dp</dimen>
+    <dimen name="edt_margintop">3dp</dimen>
+    <dimen name="edt_size">18dp</dimen>
+    <dimen name="edt_wight">265dp</dimen>
+
+    <!-- tv -->
+    <dimen name="tv_marginright">15dp</dimen>
+    <dimen name="tv_margintop">28dp</dimen>
+
+    <!-- -->
+    <dimen name="linear_left">10dp</dimen>
+    <dimen name="linear_top">15dp</dimen>
+
+    <dimen name="shape_search">6dp</dimen>
+
+    <dimen name="image_top">4dp</dimen>
+    <dimen name="image_left">10dp</dimen>
+    <dimen name="image_right">18dp</dimen>
+    <dimen name="image_topright">24dp</dimen>
+
+    <dimen name="image_item_left">20dp</dimen>
+    <dimen name="size_menu_bottom">40dp</dimen>
+</resources>
