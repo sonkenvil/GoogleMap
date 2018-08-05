@@ -5,11 +5,11 @@
         android:id="@+id/search"
         android:title="Tìm địa điểm"
         android:icon="@drawable/iconmaker"/>
-    <item
-        android:id="@+id/weather"
-        android:title="Xem thông tin thời tiết"
-        android:icon="@drawable/weather"
-        />
+    <!--<item-->
+        <!--android:id="@+id/weather"-->
+        <!--android:title="Xem thông tin thời tiết"-->
+        <!--android:icon="@drawable/weather"-->
+        <!--/>-->
     <item
         android:id="@+id/direction"
         android:title="Tìm đường đi giữa 2 điểm"

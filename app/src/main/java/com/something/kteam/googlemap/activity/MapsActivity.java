@@ -1,8 +1,11 @@
 package com.something.kteam.googlemap.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -12,18 +15,22 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -32,6 +39,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.something.kteam.googlemap.R;
 import com.something.kteam.googlemap.fragment.FragmentATM;
 import com.something.kteam.googlemap.fragment.FragmentDirection;
@@ -85,12 +102,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Vector<Marker> listMarker;
     private Vector<Polyline> listPolylines;
 
+
+    SupportMapFragment mapFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(map);
 
         navigationView = (NavigationView) findViewById(R.id.NavigationView);
@@ -102,30 +123,172 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         listPolylines = new Vector<>();
         menu.setOnClickListener(this);
         fragmentManager = getSupportFragmentManager();
+// set vi tri mylocation
+//        View mapView = mapFragment.getView();
+        if (ContextCompat.checkSelfPermission(MapsActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
 
-        // set vi tri mylocation
-        View mapView = mapFragment.getView();
-        if (mapView != null &&
-                mapView.findViewById(map) != null) {
-            // Get the button view
-            View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-            // and next place it, on bottom right (as Google Maps app)
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
-                    locationButton.getLayoutParams();
-            // position on right bottom
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-            layoutParams.setMargins(0, 0, 20, 32);
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MapsActivity.this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(MapsActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        1);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            AAA();
         }
 
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        FragmentSearchPlace searchPlace = new FragmentSearchPlace();
-        transaction.replace(R.id.LinearMapActivity, searchPlace);
-        drawerLayout.closeDrawer(Gravity.START);
-        transaction.commit();
+    }
 
-        mapFragment.getMapAsync(this);
+    void AAA() {
+        try {
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            FragmentSearchPlace searchPlace = new FragmentSearchPlace();
+            transaction.replace(R.id.LinearMapActivity, searchPlace);
+            drawerLayout.closeDrawer(Gravity.START);
+            transaction.commit();
 
+            mapFragment.getMapAsync(this);
+
+            setUpMapIfNeeded();
+            requestLocationUpdates();
+        } catch (Exception e) {
+
+        }
+
+
+    }
+
+    private void requestLocationUpdates() {
+
+        LocationRequest request = new LocationRequest();
+
+        FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
+
+        int permission = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permission == PackageManager.PERMISSION_GRANTED) {
+            // Request location updates and when an update is
+            // received, store the location in Firebase
+            client.requestLocationUpdates(request, new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+
+                    Location location = locationResult.getLastLocation();
+                    setMarker(location);
+
+                }
+            }, null);
+        }
+
+
+    }
+
+    private void setMarker(Location location) {
+        // When a location update is received, put or update
+        // its value in mMarkers, which contains all the markers
+        // for locations received, so that we can build the
+        // boundaries required to show them all on the map at once
+
+        double lat = Double.parseDouble(String.valueOf(location.getLatitude()));
+        double lng = Double.parseDouble(String.valueOf(location.getLongitude()));
+        LatLng latLng = new LatLng(lat, lng);
+
+      /*  mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(lat, lng), 300));*/
+        mMap.addMarker(new MarkerOptions().position(latLng));
+        CameraUpdate moCameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 15);
+        mMap.animateCamera(moCameraUpdate, 3000, null);
+    }
+
+
+    @SuppressLint("MissingPermission")
+    private void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+//        if (mMap == null) {
+//            // Try to obtain the map from the SupportMapFragment.
+//            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+//                    .getMap();
+//            mMap.setMyLocationEnabled(true);
+//            // Check if we were successful in obtaining the map.
+//            if (mMap != null) {
+//
+//
+//                mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+//
+//                    @Override
+//                    public void onMyLocationChange(Location arg0) {
+//                        // TODO Auto-generated method stub
+//
+//                        mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.getLatitude(), arg0.getLongitude())).title("It's Me!"));
+//                    }
+//                });
+//
+//            }
+//        }else {
+//
+//            mMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+//
+//                @Override
+//                public void onMyLocationChange(Location arg0) {
+//                    // TODO Auto-generated method stub
+//
+//                    mMap.addMarker(new MarkerOptions().position(new LatLng(arg0.getLatitude(), arg0.getLongitude())).title("It's Me!"));
+//                }
+//            });
+//        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        View mapView = mapFragment.getView();
+//        if (mapView != null &&
+//                mapView.findViewById(map) != null) {
+//            // Get the button view
+//            View locationButton = ((View) mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+//            // and next place it, on bottom right (as Google Maps app)
+//            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+//                    locationButton.getLayoutParams();
+//            // position on right bottom
+//            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+//            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+//            layoutParams.setMargins(0, 0, 20, 32);
+//        }
+//
+//        FragmentTransaction transaction = fragmentManager.beginTransaction();
+//        FragmentSearchPlace searchPlace = new FragmentSearchPlace();
+//        transaction.replace(R.id.LinearMapActivity, searchPlace);
+//        drawerLayout.closeDrawer(Gravity.START);
+//        transaction.commit();
+//
+//        mapFragment.getMapAsync(this);
+        if (requestCode == 1) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        AAA();
+                    }
+                }, 3000);
+            } else {
+                // permission denied, boo! Disable the
+                // functionality that depends on this permission.
+            }
+        }
     }
 
     @Override
@@ -157,14 +320,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 transaction1.commit();
                 drawerLayout.closeDrawer(Gravity.START);
                 break;
-            case R.id.weather:
-                removeMarker_Polyline();
-                FragmentTransaction transaction2 = fragmentManager.beginTransaction();
-                FragmentWeather fragmentWeather = new FragmentWeather();
-                transaction2.replace(R.id.LinearMapActivity, fragmentWeather);
-                transaction2.commit();
-                drawerLayout.closeDrawer(Gravity.START);
-                break;
+//            case R.id.weather:
+//                removeMarker_Polyline();
+//                FragmentTransaction transaction2 = fragmentManager.beginTransaction();
+//                FragmentWeather fragmentWeather = new FragmentWeather();
+//                transaction2.replace(R.id.LinearMapActivity, fragmentWeather);
+//                transaction2.commit();
+//                drawerLayout.closeDrawer(Gravity.START);
+//                break;
             case R.id.direction:
                 removeMarker_Polyline();
                 FragmentTransaction transaction3 = fragmentManager.beginTransaction();
@@ -274,41 +437,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     @Override
                     public View getInfoContents(Marker marker) {
-                        View view = getLayoutInflater().inflate(R.layout.custom_inforwindow, null);
-                        temp = (TextView) view.findViewById(R.id.temp);
-                        status = (ImageView) view.findViewById(R.id.status);
-                        temp_min = (TextView) view.findViewById(R.id.temp_min);
-                        temp_max = (TextView) view.findViewById(R.id.temp_max);
-                        day_date = (TextView) view.findViewById(R.id.day_date);
-
-                        int kq = (int) ((Float.parseFloat(weather.getTemp()) - 32) / 1.8);
-                        if ((float) ((Float.parseFloat(weather.getTemp()) - 32) / 1.8) - (int) ((Float.parseFloat(weather.getTemp()) - 32) / 1.8) >= 0.5)
-                            kq += 1;
-                        temp.setText("" + kq + "°C");
-
-                        Glide.with(MapsActivity.this)
-                                .load(weather.getImage())
-                                .override(200, 300)
-                                .into(status);
-
-                        title = (TextView) view.findViewById(R.id.title);
-                        title.setText(weather.getCity());
-
-
-                        int low = (int) ((Float.parseFloat(weather.getLow()) - 32) / 1.8);
-                        if ((float) ((Float.parseFloat(weather.getLow()) - 32) / 1.8) - (int) ((Float.parseFloat(weather.getLow()) - 32) / 1.8) >= 0.5)
-                            low += 1;
-                        temp_min.setText(low + "°C");
-
-
-                        int high = (int) ((Float.parseFloat(weather.getHigh()) - 32) / 1.8);
-                        if ((float) ((Float.parseFloat(weather.getHigh()) - 32) / 1.8) - (int) ((Float.parseFloat(weather.getHigh()) - 32) / 1.8) >= 0.5)
-                            high += 1;
-                        temp_max.setText(high + "°C");
-
-
-                        day_date.setText(weather.getDay());
-                        return view;
+//                        View view = getLayoutInflater().inflate(R.layout.custom_inforwindow, null);
+//                        temp = (TextView) view.findViewById(R.id.temp);
+//                        status = (ImageView) view.findViewById(R.id.status);
+//                        temp_min = (TextView) view.findViewById(R.id.temp_min);
+//                        temp_max = (TextView) view.findViewById(R.id.temp_max);
+//                        day_date = (TextView) view.findViewById(R.id.day_date);
+//
+//                        int kq = (int) ((Float.parseFloat(weather.getTemp()) - 32) / 1.8);
+//                        if ((float) ((Float.parseFloat(weather.getTemp()) - 32) / 1.8) - (int) ((Float.parseFloat(weather.getTemp()) - 32) / 1.8) >= 0.5)
+//                            kq += 1;
+//                        temp.setText("" + kq + "°C");
+//
+//                        Glide.with(MapsActivity.this)
+//                                .load(weather.getImage())
+//                                .override(200, 300)
+//                                .into(status);
+//
+//                        title = (TextView) view.findViewById(R.id.title);
+//                        title.setText(weather.getCity());
+//
+//
+//                        int low = (int) ((Float.parseFloat(weather.getLow()) - 32) / 1.8);
+//                        if ((float) ((Float.parseFloat(weather.getLow()) - 32) / 1.8) - (int) ((Float.parseFloat(weather.getLow()) - 32) / 1.8) >= 0.5)
+//                            low += 1;
+//                        temp_min.setText(low + "°C");
+//
+//
+//                        int high = (int) ((Float.parseFloat(weather.getHigh()) - 32) / 1.8);
+//                        if ((float) ((Float.parseFloat(weather.getHigh()) - 32) / 1.8) - (int) ((Float.parseFloat(weather.getHigh()) - 32) / 1.8) >= 0.5)
+//                            high += 1;
+//                        temp_max.setText(high + "°C");
+//
+//
+//                        day_date.setText(weather.getDay());
+                        return null;
                     }
                 });
             }
@@ -335,7 +498,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 intent.putExtra("tp", weather.getTp());
                                 intent.putExtra("weather", weather.getDescription());
                                 intent.putParcelableArrayListExtra("list", listWeather);
-                                startActivity(intent);
                             }
                         });
 
@@ -360,7 +522,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onSuccess(ArrayList<Atm> listATM) {
                 for (Atm i : listATM) {
-                    Log.d("123",""+listATM.size());
+                    Log.d("123", "" + listATM.size());
                     LatLng latLng = new LatLng(i.getLat(), i.getLng());
                     listMarker.add(mMap.addMarker(new MarkerOptions().position(latLng)
                             .title(i.getName()).icon(BitmapDescriptorFactory.fromResource(R.mipmap.atm))));
@@ -396,14 +558,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         String APIkey = "AIzaSyDdg1V9pKIF_dc4zRyr32_KKLS0rtKjTTQ";
-        String URL = "https://maps.googleapis.com/maps/api/directions/json?origin=" + locago.getLatLng().latitude+", "+ locago.getLatLng().longitude+ "&destination="
-                + locaDes.getLatLng().latitude+", "+ locaDes.getLatLng().longitude+  "&mode=" + transport;
+        String URL = "https://maps.googleapis.com/maps/api/directions/json?origin=" + locago.getLatLng().latitude + "," + locago.getLatLng().longitude + "&destination="
+                + locaDes.getLatLng().latitude + "," + locaDes.getLatLng().longitude + "&mode=" + transport;
 
         ParseJsonDirection parseJsonDirection = new ParseJsonDirection(URL, MapsActivity.this);
         parseJsonDirection.getDirection(new ParseJsonDirection.Callback() {
             @Override
             public void onSuccess(Routes routes, boolean bl) {
-                if(bl) {
+                if (bl) {
                     listMarker.add(mMap.addMarker(new MarkerOptions().position(locago.getLatLng())
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.start_blue))));
                     listMarker.add(mMap.addMarker(new MarkerOptions().position(locaDes.getLatLng())
@@ -427,9 +589,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     listPolylines.add(mMap.addPolyline(polylineOptions));
                     progressDialog.dismiss();
                     linearLayout.setVisibility(View.VISIBLE);
-                }else {
+                } else {
                     progressDialog.dismiss();
-                    tv_time.setText(""+transport+" không khả dụng");
+                    tv_time.setText("" + transport + " không khả dụng");
                     linearLayout.setVisibility(View.VISIBLE);
                 }
             }
@@ -448,7 +610,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    private void removeMarker_Polyline(){
+    private void removeMarker_Polyline() {
         if (listPolylines.size() > 0) {
             for (Polyline i : listPolylines) i.remove();
         }

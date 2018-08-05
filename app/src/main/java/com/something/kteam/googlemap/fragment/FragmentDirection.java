@@ -227,7 +227,7 @@ public class FragmentDirection extends Fragment implements View.OnClickListener 
                     final ProgressDialog progressDialog = new ProgressDialog(getActivity());
                     progressDialog.setMessage("Đang tìm đường");
                     progressDialog.show();
-                    onFragmentManager.onDataDirection("bicycling", placeGo, placeDes, progressDialog, ll_menu_bottom_find_customer, tv_time);
+                    onFragmentManager.onDataDirection("walking", placeGo, placeDes, progressDialog, ll_menu_bottom_find_customer, tv_time);
                 }
 
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {

@@ -59,6 +59,7 @@
         android:layout_height="50dp"
         android:background="#4285F4">
         <LinearLayout
+            android:visibility="gone"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -97,19 +98,20 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
+                android:background="@drawable/bg_white"
                 android:id="@+id/bg_walk">
                 <ImageView
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:id="@+id/img_walk"
-                    android:src="@drawable/ic_walk"/>
+                    android:src="@drawable/ic_walk_click"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginLeft="5dp"
                     android:id="@+id/tv_walk"
-                    android:textColor="@color/color_white"
+                    android:textColor="#4285F4"
                     android:text="Đi bộ"/>
             </LinearLayout>
         </LinearLayout>
